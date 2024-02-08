@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import stat
 import mimetypes
 import argparse
 
@@ -13,7 +12,7 @@ def classify_file_type(file_path: str) -> str:
 
 
 def analyze_directory(
-    directory_path: str, size_threshold: int = 0, show_world_writable: bool = False
+    directory_path: str, size_threshold: int, show_world_writable: bool = False
 ) -> None:
     """Analyze the file system structure and usage."""
     file_types = {}
@@ -29,7 +28,7 @@ def analyze_directory(
                 file_types[file_type] = file_types.get(file_type, 0) + file_size
                 file_permissions = os.stat(file_path).st_mode
 
-                if file_permissions & stat.S_IWOTH:
+                if os.access(file_path, os.W_OK):
                     world_writable_files.append(file_path)
 
                 if file_size > size_threshold:
@@ -43,28 +42,41 @@ def analyze_directory(
         print(f"{file_type}: {total_size / 1024 / 1024:.2f} MB")
 
     print("\nLarge files:")
-    for file_path, file_size in large_files:
-        print(f"{file_path}: {file_size / 1024 / 1024:.2f} MB")
+    if large_files:
+        for file_path, file_size in large_files:
+            print(f"{file_path}: {file_size / 1024 / 1024:.2f} MB")
+    else:
+        print(f"There is no files larger than {size_threshold / 1024 / 1024:.2f} MB")
 
     if show_world_writable:
         print("\nWorld-Writable Files:")
-        for file_path in world_writable_files:
-            print(file_path)
+        if world_writable_files:
+            for file_path in world_writable_files:
+                print(file_path)
+        else:
+            print("There is no World-Writable Files!")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Analyze file system structure and usage."
     )
-    parser.add_argument("directory", type=str, help="The directory path to analyze.")
     parser.add_argument(
+        "directory",
+        type=str,
+        help="The directory path to analyze."
+    )
+    parser.add_argument(
+        "-s",
         "--size_threshold",
         type=int,
-        default=0,
+        default=1048576,
         help="The size threshold for large files (in bytes).",
     )
     parser.add_argument(
-        "--show_world_writable", action="store_true", help="Show world-writable files."
+        "--show_world_writable",
+        action="store_true",
+        help="Show world-writable files."
     )
     args = parser.parse_args()
 
