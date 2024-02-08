@@ -68,13 +68,14 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-s",
-        "--size_threshold",
+        "--size-threshold",
         type=int,
         default=1048576,
         help="The size threshold for large files (in bytes).",
     )
     parser.add_argument(
-        "--show_world_writable",
+        "-w",
+        "--show-world-writable",
         action="store_true",
         help="Show world-writable files."
     )
