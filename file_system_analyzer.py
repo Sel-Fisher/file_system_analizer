@@ -26,7 +26,6 @@ def analyze_directory(
                 file_size = os.path.getsize(file_path)
                 file_type = classify_file_type(file_path)
                 file_types[file_type] = file_types.get(file_type, 0) + file_size
-                file_permissions = os.stat(file_path).st_mode
 
                 if os.access(file_path, os.W_OK):
                     world_writable_files.append(file_path)
