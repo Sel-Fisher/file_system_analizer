@@ -1,16 +1,20 @@
+#!/usr/bin/env python3
+
 import os
 import stat
 import mimetypes
 import argparse
 
 
-def classify_file_type(file_path):
+def classify_file_type(file_path: str) -> str:
     """Classify file into categories based on extension or file signatures."""
     mime_type, _ = mimetypes.guess_type(file_path)
     return mime_type.split("/")[0] if mime_type else "unknown"
 
 
-def analyze_directory(directory_path, size_threshold: int = 0):
+def analyze_directory(
+    directory_path: str, size_threshold: int = 0, show_world_writable: bool = False
+) -> None:
     """Analyze the file system structure and usage."""
     file_types = {}
     large_files = []
@@ -42,18 +46,29 @@ def analyze_directory(directory_path, size_threshold: int = 0):
     for file_path, file_size in large_files:
         print(f"{file_path}: {file_size / 1024 / 1024:.2f} MB")
 
-    print("\nWorld-Writable Files:")
-    for file_path in world_writable_files:
-        print(file_path)
+    if show_world_writable:
+        print("\nWorld-Writable Files:")
+        for file_path in world_writable_files:
+            print(file_path)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Analyze file system structure and usage.")
+    parser = argparse.ArgumentParser(
+        description="Analyze file system structure and usage."
+    )
     parser.add_argument("directory", type=str, help="The directory path to analyze.")
-    parser.add_argument("--size_threshold", type=int, default=0, help="The size threshold for large files (in bytes).")
+    parser.add_argument(
+        "--size_threshold",
+        type=int,
+        default=0,
+        help="The size threshold for large files (in bytes).",
+    )
+    parser.add_argument(
+        "--show_world_writable", action="store_true", help="Show world-writable files."
+    )
     args = parser.parse_args()
 
     if not os.path.isdir(args.directory):
         print(f"Error: {args.directory} is not a directory.")
     else:
-        analyze_directory(args.directory, args.size_threshold)
+        analyze_directory(args.directory, args.size_threshold, args.show_world_writable)
